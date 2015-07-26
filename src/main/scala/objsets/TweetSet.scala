@@ -34,7 +34,6 @@ class Tweet(val user: String, val text: String, val retweets: Int) {
  * [1] http://en.wikipedia.org/wiki/Binary_search_tree
  */
 abstract class TweetSet {
-
   /**
    * This method takes a predicate and returns a subset of all the elements
    * in the original set for which the predicate is true.
@@ -55,8 +54,7 @@ abstract class TweetSet {
    * Question: Should we implment this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-   def union(that: TweetSet): TweetSet
-
+  def union(that: TweetSet): TweetSet
   /**
    * Returns the tweet from this set which has the greatest retweet count.
    *
@@ -186,11 +184,10 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
   /**
    * Returns a new `TweetSet` that is the union of `TweetSet`s `this` and `that`.
    *
-   * Question: Should we implment this method here, or should it remain abstract
+   * Question: Should we implement this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-  def union(that: TweetSet): TweetSet = left.union(right.union(that)).incl(elem)
-
+  def union(that: TweetSet): TweetSet = left.union(right.union(that.incl(elem)))
   /**
    * Returns the tweet from this set which has the greatest retweet count.
    *
@@ -201,16 +198,20 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
    * and be implemented in the subclasses?
    */
   def mostRetweeted: Tweet = {
-    def retweetsOfMostRetweeted(tweetSet:TweetSet):Int = try {
-      tweetSet.mostRetweeted.retweets
+    var result = elem
+    try{
+      val tweet = left.mostRetweeted
+      if(tweet.retweets > result.retweets) result = tweet
     }catch {
-      case e:NoSuchElementException => 0
+      case e:NoSuchElementException =>
     }
-    val leftMostRetweetedRetweets: Int = retweetsOfMostRetweeted(left)
-    val rightMostRetweetedRetweets: Int = retweetsOfMostRetweeted(right)
-    if(elem.retweets >= leftMostRetweetedRetweets && elem.retweets >= rightMostRetweetedRetweets)elem
-    else if(leftMostRetweetedRetweets >= rightMostRetweetedRetweets) left.mostRetweeted
-    else right.mostRetweeted
+    try{
+      val tweet = right.mostRetweeted
+      if(tweet.retweets > result.retweets) result = tweet
+    }catch {
+      case e:NoSuchElementException =>
+    }
+    result
   }
 }
 
